@@ -1,0 +1,11 @@
+{
+  "profiles": {
+    "Wodsoft.StunServer": {
+      "commandName": "Project",
+      "commandLineArgs": "run -v Debug",
+      "environmentVariables": {
+        "SSLKEYLOGFILE": "c:\\tlskey.log"
+      }
+    }
+  }
+}
