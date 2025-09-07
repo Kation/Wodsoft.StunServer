@@ -657,8 +657,6 @@ namespace Wodsoft.StunServer.Commands
             if (!hasError)
             {
                 responseAttributes.Add(CreateMappedAddressAttribute(endPoint.Address, endPoint.Port, ref responseLength));
-                responseAttributes.Add(CreateSourceAddressAttribute(thisAddress, thisPort, ref responseLength));
-                responseAttributes.Add(CreateChangedAddressAttribute(otherAddress, otherPort, ref responseLength));
                 if (replyEndPoint != null)
                     responseAttributes.Add(CreateReflectedFromAttribute(endPoint.Address, endPoint.Port, ref responseLength));
                 if (isRFC5389)
@@ -666,6 +664,11 @@ namespace Wodsoft.StunServer.Commands
                     responseAttributes.Add(CreateXORMappedAddressAttribute(endPoint.Address, endPoint.Port, ref responseLength));
                     responseAttributes.Add(CreateResponseOriginAttribute(thisAddress, thisPort, ref responseLength));
                     responseAttributes.Add(CreateOtherAddressAttribute(otherAddress, otherPort, ref responseLength));
+                }
+                else
+                {
+                    responseAttributes.Add(CreateSourceAddressAttribute(thisAddress, thisPort, ref responseLength));
+                    responseAttributes.Add(CreateChangedAddressAttribute(otherAddress, otherPort, ref responseLength));
                 }
                 //if (replyEndPoint != null)
                 //    responseAttributes.Add(CreateReflectedFromAttribute(endPoint.Address, endPoint.Port, ref responseLength));

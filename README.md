@@ -8,7 +8,7 @@
 RFC3489 11.2.1 Mapped-Address  
 RFC3489 11.2.2 Response-Address(RFC5389弃用)  
 RFC3489 11.2.3 Changed-Address(RFC5389弃用)  
-RFC3489 11.2.4 Change-Request(RFC5389弃用)  
+RFC3489 11.2.4 Change-Request(RFC5389弃用,RFC5780重新启用)  
 RFC3489 11.2.5 Source-Address(RFC5389弃用)  
 RFC3489 11.2.6 Username(不支持)  
 RFC3489 11.2.7 Password(不支持,RFC5389弃用)  
