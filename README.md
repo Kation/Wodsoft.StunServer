@@ -5,15 +5,38 @@
 
 ## RFC3489
 仅支持普通绑定请求。  
-RFC3489 11.2.2 ResponseAddress  
-RFC3489 11.2.3 ChangeRequest  
-RFC3489 11.2.8 MessageIntegrity  
+RFC3489 11.2.1 Mapped-Address  
+RFC3489 11.2.2 Response-Address(RFC5389弃用)  
+RFC3489 11.2.3 Changed-Address(RFC5389弃用)  
+RFC3489 11.2.4 Change-Request(RFC5389弃用)  
+RFC3489 11.2.5 Source-Address(RFC5389弃用)  
+RFC3489 11.2.6 Username(不支持)  
+RFC3489 11.2.7 Password(不支持,RFC5389弃用)  
+RFC3489 11.2.8 Message-Integrity  
+RFC3489 11.2.9 Error-Code  
+RFC3489 11.2.10 Unknown-Attribute  
+RFC3489 11.2.11 Reflected-From(RFC5389弃用)
 
 ## RFC5389
 仅支持普通绑定请求。  
-RFC3489 11.2.2 ResponseAddress  
-RFC3489 11.2.3 ChangeRequest  
-RFC5389 15.4 MessageIntegrity  
+RFC5389 15.1 Mapped-Address  
+RFC5389 15.2 XOR-Mapped-Address  
+RFC5389 15.3 Username(不支持)  
+RFC5389 15.4 Message-Integrity  
+RFC5389 15.5 Fingerprint(不支持)  
+RFC5389 15.6 Error-Code  
+RFC5389 15.7 Realm(不支持)  
+RFC5389 15.8 Nonce(不支持)  
+RFC5389 15.9 Unknown-Attribute  
+RFC5389 15.10 Sofeware(不支持)  
+RFC5389 15.11 Alternate-Server(不支持)  
+
+## RFC5780
+RFC5780 7.2 Change-Request  
+RFC5780 7.3 Response-Origin  
+RFC5780 7.4 Other-Address  
+RFC5780 7.5 Response-Port  
+RFC5780 7.6 Padding(不支持)
 
 # 如何使用
 

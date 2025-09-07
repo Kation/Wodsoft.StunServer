@@ -19,10 +19,12 @@ namespace Wodsoft.StunServer
         ErrorCode = 0x0900,//9
         Unknown = 0x0A00,//10
         ReflectedFrom = 0x0B00,//11
-        ResponseOrigin = 0x0C00,//12
-        OtherAddress = 0x0D00,//13
         Realm = 0x1400,
         Nonce = 0x1500,
         XORMappedAddress = 0x2000,//32
+        Padding = 0x2600,
+        ResponsePort = 0x2700,
+        ResponseOrigin = 0x2B80,
+        OtherAddress = 0x2C80
     }
 }

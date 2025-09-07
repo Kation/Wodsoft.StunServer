@@ -306,7 +306,7 @@ namespace Wodsoft.StunServer.Commands
                 int receivedBytes;
                 _ = Task.Delay(5000).ContinueWith(task => timeoutTokenSource.Cancel());
                 try
-                {                    
+                {
                     receivedBytes = await clientSocket.ReceiveAsync(memory.Memory, timeoutTokenSource.Token).ConfigureAwait(false);
                 }
                 catch
@@ -585,6 +585,9 @@ namespace Wodsoft.StunServer.Commands
                     case MessageAttributeType.ErrorCode:
                     case MessageAttributeType.Unknown:
                     case MessageAttributeType.ReflectedFrom:
+                    case MessageAttributeType.Padding:
+                    case MessageAttributeType.Realm:
+                    case MessageAttributeType.Nonce:
                         unknownAttributes.Add((ushort)attributeType);
                         break;
                     case MessageAttributeType.ResponseAddress:
@@ -595,12 +598,12 @@ namespace Wodsoft.StunServer.Commands
                             case 1:
                                 if (data.Length < 8)
                                     return null;
-                                replyEndPoint = new IPEndPoint(new IPAddress(data.Slice(4, 4)), MemoryMarshal.Read<ushort>(data.Slice(2, 2)));
+                                replyEndPoint = new IPEndPoint(new IPAddress(data.Slice(4, 4)), BinaryPrimitives.ReadUInt16BigEndian(data.Slice(2, 2)));
                                 break;
                             case 2:
                                 if (data.Length < 20)
                                     return null;
-                                replyEndPoint = new IPEndPoint(new IPAddress(data.Slice(4, 16)), MemoryMarshal.Read<ushort>(data.Slice(2, 2)));
+                                replyEndPoint = new IPEndPoint(new IPAddress(data.Slice(4, 16)), BinaryPrimitives.ReadUInt16BigEndian(data.Slice(2, 2)));
                                 break;
                             default:
                                 return null;
@@ -613,6 +616,11 @@ namespace Wodsoft.StunServer.Commands
                             changePort = true;
                         if ((data[3] & (byte)4) == (byte)4)
                             changeAddress = true;
+                        break;
+                    case MessageAttributeType.ResponsePort:
+                        if (data.Length != 4)
+                            return null;
+                        replyEndPoint = new IPEndPoint(endPoint.Address, BinaryPrimitives.ReadUInt16BigEndian(data));
                         break;
                     case MessageAttributeType.MessageIntegrity:
                         if (current != length)
@@ -651,8 +659,14 @@ namespace Wodsoft.StunServer.Commands
                 responseAttributes.Add(CreateMappedAddressAttribute(endPoint.Address, endPoint.Port, ref responseLength));
                 responseAttributes.Add(CreateSourceAddressAttribute(thisAddress, thisPort, ref responseLength));
                 responseAttributes.Add(CreateChangedAddressAttribute(otherAddress, otherPort, ref responseLength));
+                if (replyEndPoint != null)
+                    responseAttributes.Add(CreateReflectedFromAttribute(endPoint.Address, endPoint.Port, ref responseLength));
                 if (isRFC5389)
+                {
                     responseAttributes.Add(CreateXORMappedAddressAttribute(endPoint.Address, endPoint.Port, ref responseLength));
+                    responseAttributes.Add(CreateResponseOriginAttribute(thisAddress, thisPort, ref responseLength));
+                    responseAttributes.Add(CreateOtherAddressAttribute(otherAddress, otherPort, ref responseLength));
+                }
                 //if (replyEndPoint != null)
                 //    responseAttributes.Add(CreateReflectedFromAttribute(endPoint.Address, endPoint.Port, ref responseLength));
             }
@@ -738,6 +752,17 @@ namespace Wodsoft.StunServer.Commands
         {
             return CreateAddressAttribute(MessageAttributeType.ReflectedFrom, address, port, ref length);
         }
+
+        private Func<Span<byte>, Span<byte>, int> CreateOtherAddressAttribute(IPAddress address, int port, ref int length)
+        {
+            return CreateAddressAttribute(MessageAttributeType.OtherAddress, address, port, ref length);
+        }
+
+        private Func<Span<byte>, Span<byte>, int> CreateResponseOriginAttribute(IPAddress address, int port, ref int length)
+        {
+            return CreateAddressAttribute(MessageAttributeType.ResponseOrigin, address, port, ref length);
+        }
+
         private Func<Span<byte>, Span<byte>, int> CreateXORMappedAddressAttribute(IPAddress address, int port, ref int length)
         {
             int attributeLength;
