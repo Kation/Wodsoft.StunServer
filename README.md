@@ -70,3 +70,7 @@ stunserver run
 ```
 Local开头的参数，一般用于处于内网环境，没有直接拥有公网IP地址的服务器使用。  
 该参数用于进行Socket绑定，不影响返回给Stun客户端的服务器地址与端口号。
+
+# 推荐Stun客户端
+C#开发的网络NAT状态测试工具  
+https://github.com/HMBSbige/NatTypeTester
