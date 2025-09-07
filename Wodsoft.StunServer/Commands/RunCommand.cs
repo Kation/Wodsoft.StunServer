@@ -52,7 +52,7 @@ namespace Wodsoft.StunServer.Commands
                     Console.WriteLine($"Read configuration file failed: {ex.Message}");
                     return;
                 }
-                config = await JsonSerializer.DeserializeAsync<Config>(stream) ?? new Config();
+                config = await JsonSerializer.DeserializeAsync<Config>(stream, SourceGenerationContext.Default.Options) ?? new Config();
             }
             if (!config.Validate())
                 return;
