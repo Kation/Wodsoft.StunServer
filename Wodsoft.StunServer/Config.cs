@@ -12,11 +12,11 @@ namespace Wodsoft.StunServer
     {
         public string? PrimaryIPv4Address { get; set; }
 
-        //public string? PrimaryIPv6Address { get; set; }
+        public string? PrimaryIPv6Address { get; set; }
 
         public string? SecondaryIPv4Address { get; set; }
 
-        //public string? SecondaryIPv6Address { get; set; }
+        public string? SecondaryIPv6Address { get; set; }
 
         public int PrimaryPort { get; set; } = 3478;
 
@@ -28,11 +28,11 @@ namespace Wodsoft.StunServer
 
         public string? LocalPrimaryIPv4Address { get; set; }
 
-        //public string? LocalPrimaryIPv6Address { get; set; }
+        public string? LocalPrimaryIPv6Address { get; set; }
 
         public string? LocalSecondaryIPv4Address { get; set; }
 
-        //public string? LocalSecondaryIPv6Address { get; set; }
+        public string? LocalSecondaryIPv6Address { get; set; }
 
         public int? LocalPrimaryPort { get; set; }
 
@@ -41,46 +41,143 @@ namespace Wodsoft.StunServer
         public int? LocalTLSPrimaryPort { get; set; }
 
         public int? LocalTLSSecondaryPort { get; set; }
-
+        
         public bool EnableUDP { get; set; } = true;
 
         public bool EnableTCP { get; set; } = true;
 
         public bool EnableTLS { get; set; } = false;
 
+        public bool EnableIPv4 { get; set; } = true;
+
+        public bool EnableIPv6 { get; set; } = false;
+
         public string? CertificateFile { get; set; } = "tls.pem";
 
         public bool Validate()
         {
-            if (PrimaryIPv4Address == null)
+            if (!EnableIPv4 && !EnableIPv6)
             {
-                Console.WriteLine("PrimaryIPv4Address can't be null.");
+                Console.WriteLine("At least enable an IPv4 or IPv6.");
                 return false;
             }
-            if (SecondaryIPv4Address == null)
+            if (EnableIPv4)
             {
-                Console.WriteLine("SecondaryIPv4Address can't be null.");
-                return false;
+                if (PrimaryIPv4Address == null)
+                {
+                    Console.WriteLine("PrimaryIPv4Address can't be null.");
+                    return false;
+                }
+                if (SecondaryIPv4Address == null)
+                {
+                    Console.WriteLine("SecondaryIPv4Address can't be null.");
+                    return false;
+                }
+                if (!IPAddress.TryParse(PrimaryIPv4Address, out var primaryIPv4Address))
+                {
+                    Console.WriteLine("PrimaryIPv4Address is invalid.");
+                    return false;
+                }
+                if (primaryIPv4Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    Console.WriteLine("PrimaryIPv4Address is not an IPv4 address.");
+                    return false;
+                }
+                if (!IPAddress.TryParse(SecondaryIPv4Address, out var secondaryIPv4Address))
+                {
+                    Console.WriteLine("SecondaryIPv4Address is invalid.");
+                    return false;
+                }
+                if (secondaryIPv4Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+                {
+                    Console.WriteLine("SecondaryIPv4Address is not an IPv4 address.");
+                    return false;
+                }
+                if (LocalPrimaryIPv4Address != null)
+                {
+                    if (!IPAddress.TryParse(LocalPrimaryIPv4Address, out var localPrimaryIPv4Address))
+                    {
+                        Console.WriteLine("LocalPrimaryIPv4Address is invalid.");
+                        return false;
+                    }
+                    if (localPrimaryIPv4Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        Console.WriteLine("LocalPrimaryIPv4Address is not an IPv4 address.");
+                        return false;
+                    }
+                }
+                if (LocalSecondaryIPv4Address != null)
+                {
+                    if (!IPAddress.TryParse(LocalSecondaryIPv4Address, out var localSecondaryIPv4Address))
+                    {
+                        Console.WriteLine("LocalSecondaryIPv4Address is invalid.");
+                        return false;
+                    }
+                    if (localSecondaryIPv4Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetwork)
+                    {
+                        Console.WriteLine("LocalSecondaryIPv4Address is not an IPv4 address.");
+                        return false;
+                    }
+                }
             }
-            if (!IPAddress.TryParse(PrimaryIPv4Address, out _))
+            if (EnableIPv6)
             {
-                Console.WriteLine("PrimaryIPv4Address is invalid.");
-                return false;
-            }
-            if (!IPAddress.TryParse(SecondaryIPv4Address, out _))
-            {
-                Console.WriteLine("SecondaryIPv4Address is invalid.");
-                return false;
-            }
-            if (LocalPrimaryIPv4Address != null && !IPAddress.TryParse(LocalPrimaryIPv4Address, out _))
-            {
-                Console.WriteLine("LocalPrimaryIPv4Address is invalid.");
-                return false;
-            }
-            if (LocalSecondaryIPv4Address != null && !IPAddress.TryParse(LocalSecondaryIPv4Address, out _))
-            {
-                Console.WriteLine("LocalSecondaryIPv4Address is invalid.");
-                return false;
+                if (PrimaryIPv6Address == null)
+                {
+                    Console.WriteLine("PrimaryIPv6Address can't be null.");
+                    return false;
+                }
+                if (SecondaryIPv6Address == null)
+                {
+                    Console.WriteLine("SecondaryIPv6Address can't be null.");
+                    return false;
+                }
+                if (!IPAddress.TryParse(PrimaryIPv6Address, out var primaryIPv6Address))
+                {
+                    Console.WriteLine("PrimaryIPv6Address is invalid.");
+                    return false;
+                }
+                if (primaryIPv6Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    Console.WriteLine("PrimaryIPv6Address is not an IPv6 address.");
+                    return false;
+                }
+                if (!IPAddress.TryParse(SecondaryIPv6Address, out var secondaryIPv6Address))
+                {
+                    Console.WriteLine("SecondaryIPv6Address is invalid.");
+                    return false;
+                }
+                if (secondaryIPv6Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+                {
+                    Console.WriteLine("SecondaryIPv6Address is not an IPv6 address.");
+                    return false;
+                }
+                if (LocalPrimaryIPv6Address != null)
+                {
+                    if (!IPAddress.TryParse(LocalPrimaryIPv6Address, out var localPrimaryIPv6Address))
+                    {
+                        Console.WriteLine("LocalPrimaryIPv6Address is invalid.");
+                        return false;
+                    }
+                    if (localPrimaryIPv6Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+                    {
+                        Console.WriteLine("LocalPrimaryIPv6Address is not an IPv6 address.");
+                        return false;
+                    }
+                }
+                if (LocalSecondaryIPv6Address != null)
+                {
+                    if (!IPAddress.TryParse(LocalSecondaryIPv6Address, out var localSecondaryIPv6Address))
+                    {
+                        Console.WriteLine("LocalSecondaryIPv6Address is invalid.");
+                        return false;
+                    }
+                    if (localSecondaryIPv6Address.AddressFamily != System.Net.Sockets.AddressFamily.InterNetworkV6)
+                    {
+                        Console.WriteLine("LocalSecondaryIPv6Address is not an IPv6 address.");
+                        return false;
+                    }
+                }
             }
             if (PrimaryPort <= 0)
             {

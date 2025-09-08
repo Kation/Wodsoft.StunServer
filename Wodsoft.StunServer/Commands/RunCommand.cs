@@ -58,10 +58,6 @@ namespace Wodsoft.StunServer.Commands
                 return;
 
             CancellationTokenSource cts = new CancellationTokenSource();
-            var primaryAddress = IPAddress.Parse(config.PrimaryIPv4Address!);
-            var secondaryAddress = IPAddress.Parse(config.SecondaryIPv4Address!);
-            IPAddress localPrimaryAddress = config.LocalPrimaryIPv4Address == null ? primaryAddress : IPAddress.Parse(config.LocalPrimaryIPv4Address);
-            IPAddress localSecondaryAddress = config.LocalSecondaryIPv4Address == null ? secondaryAddress : IPAddress.Parse(config.LocalSecondaryIPv4Address);
             List<Task<bool>> tasks = new List<Task<bool>>();
             var loggerFactory = LoggerFactory.Create(builder =>
             {
@@ -71,24 +67,57 @@ namespace Wodsoft.StunServer.Commands
 #endif
             });
             var logger = loggerFactory.CreateLogger<RunCommand>();
-            if (config.EnableUDP)
-                tasks.Add(CreateUDP(primaryAddress, secondaryAddress, config.PrimaryPort, config.SecondaryPort,
-                    localPrimaryAddress, localSecondaryAddress,
-                    config.LocalPrimaryPort ?? config.PrimaryPort, config.LocalSecondaryPort ?? config.SecondaryPort,
-                    logger, cts.Token));
-            if (config.EnableTCP)
-                tasks.Add(CreateTCP(primaryAddress, secondaryAddress, config.PrimaryPort, config.SecondaryPort,
-                    localPrimaryAddress, localSecondaryAddress,
-                    config.LocalPrimaryPort ?? config.PrimaryPort, config.LocalSecondaryPort ?? config.SecondaryPort,
-                    logger, cts.Token));
-            if (config.EnableTLS)
+            if (config.EnableIPv4)
             {
-                var certificate = X509Certificate2.CreateFromPemFile(config.CertificateFile!);
-                certificate = X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pfx), null, X509KeyStorageFlags.Exportable);
-                tasks.Add(CreateTLS(primaryAddress, secondaryAddress, config.TLSPrimaryPort, config.TLSSecondaryPort,
-                    localPrimaryAddress, localSecondaryAddress,
-                    config.LocalTLSPrimaryPort ?? config.TLSPrimaryPort, config.LocalTLSSecondaryPort ?? config.TLSSecondaryPort,
-                    certificate, logger, cts.Token));
+                var primaryAddress = IPAddress.Parse(config.PrimaryIPv4Address!);
+                var secondaryAddress = IPAddress.Parse(config.SecondaryIPv4Address!);
+                IPAddress localPrimaryAddress = config.LocalPrimaryIPv4Address == null ? primaryAddress : IPAddress.Parse(config.LocalPrimaryIPv4Address);
+                IPAddress localSecondaryAddress = config.LocalSecondaryIPv4Address == null ? secondaryAddress : IPAddress.Parse(config.LocalSecondaryIPv4Address);
+                if (config.EnableUDP)
+                    tasks.Add(CreateUDP(primaryAddress, secondaryAddress, config.PrimaryPort, config.SecondaryPort,
+                        localPrimaryAddress, localSecondaryAddress,
+                        config.LocalPrimaryPort ?? config.PrimaryPort, config.LocalSecondaryPort ?? config.SecondaryPort,
+                        logger, cts.Token));
+                if (config.EnableTCP)
+                    tasks.Add(CreateTCP(primaryAddress, secondaryAddress, config.PrimaryPort, config.SecondaryPort,
+                        localPrimaryAddress, localSecondaryAddress,
+                        config.LocalPrimaryPort ?? config.PrimaryPort, config.LocalSecondaryPort ?? config.SecondaryPort,
+                        logger, cts.Token));
+                if (config.EnableTLS)
+                {
+                    var certificate = X509Certificate2.CreateFromPemFile(config.CertificateFile!);
+                    certificate = X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pfx), null, X509KeyStorageFlags.Exportable);
+                    tasks.Add(CreateTLS(primaryAddress, secondaryAddress, config.TLSPrimaryPort, config.TLSSecondaryPort,
+                        localPrimaryAddress, localSecondaryAddress,
+                        config.LocalTLSPrimaryPort ?? config.TLSPrimaryPort, config.LocalTLSSecondaryPort ?? config.TLSSecondaryPort,
+                        certificate, logger, cts.Token));
+                }
+            }
+            if (config.EnableIPv6)
+            {
+                var primaryAddress = IPAddress.Parse(config.PrimaryIPv6Address!);
+                var secondaryAddress = IPAddress.Parse(config.SecondaryIPv6Address!);
+                IPAddress localPrimaryAddress = config.LocalPrimaryIPv6Address == null ? primaryAddress : IPAddress.Parse(config.LocalPrimaryIPv6Address);
+                IPAddress localSecondaryAddress = config.LocalSecondaryIPv6Address == null ? secondaryAddress : IPAddress.Parse(config.LocalSecondaryIPv6Address);
+                if (config.EnableUDP)
+                    tasks.Add(CreateUDP(primaryAddress, secondaryAddress, config.PrimaryPort, config.SecondaryPort,
+                        localPrimaryAddress, localSecondaryAddress,
+                        config.LocalPrimaryPort ?? config.PrimaryPort, config.LocalSecondaryPort ?? config.SecondaryPort,
+                        logger, cts.Token));
+                if (config.EnableTCP)
+                    tasks.Add(CreateTCP(primaryAddress, secondaryAddress, config.PrimaryPort, config.SecondaryPort,
+                        localPrimaryAddress, localSecondaryAddress,
+                        config.LocalPrimaryPort ?? config.PrimaryPort, config.LocalSecondaryPort ?? config.SecondaryPort,
+                        logger, cts.Token));
+                if (config.EnableTLS)
+                {
+                    var certificate = X509Certificate2.CreateFromPemFile(config.CertificateFile!);
+                    certificate = X509CertificateLoader.LoadPkcs12(certificate.Export(X509ContentType.Pfx), null, X509KeyStorageFlags.Exportable);
+                    tasks.Add(CreateTLS(primaryAddress, secondaryAddress, config.TLSPrimaryPort, config.TLSSecondaryPort,
+                        localPrimaryAddress, localSecondaryAddress,
+                        config.LocalTLSPrimaryPort ?? config.TLSPrimaryPort, config.LocalTLSSecondaryPort ?? config.TLSSecondaryPort,
+                        certificate, logger, cts.Token));
+                }
             }
             Console.CancelKeyPress += (_, e) =>
             {

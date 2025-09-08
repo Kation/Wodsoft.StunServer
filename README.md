@@ -75,19 +75,25 @@ stunserver run
 {
   "PrimaryIPv4Address": "",//第一个IPv4地址
   "SecondaryIPv4Address": "",//第二个IPv4地址
+  "PrimaryIPv6Address": "",//第一个IPv6地址
+  "SecondaryIPv6Address": "",//第二个IPv6地址
   "PrimaryPort": 3478,//第一个端口号
   "SecondaryPort": 3479,//第二个端口号
   "TLSPrimaryPort": 5349,//第一个TLS端口号
   "TLSSecondaryPort": 5350,//第二个TLS端口号
   "LocalPrimaryIPv4Address": null,//本地第一个IPv4地址
   "LocalSecondaryIPv4Address": null,//本地第二个IPv4地址
+  "LocalPrimaryIPv6Address": null,//本地第一个IPv6地址
+  "LocalSecondaryIPv6Address": null,//本地第二个IPv6地址
   "LocalPrimaryPort": null,//本地第一个端口号
   "LocalSecondaryPort": null,//本地第二个端口号
   "LocalTLSPrimaryPort": null,//本地第一个TLS端口号
   "LocalTLSSecondaryPort": null,//本地第二个TLS端口号
   "EnableUDP": true,//是否启用UDP协议
-  "EnableTCP": true,//是否启用TCP协议
-  "EnableTLS": true,//是否启用TLS协议
+  "EnableTCP": false,//是否启用TCP协议
+  "EnableTLS": false,//是否启用TLS协议
+  "EnableIPv4": true,//是否启用IPv4
+  "EnableIPv6": false,//是否启用IPv6
   "CertificateFile": "tls.pem"//TLS证书文件路径（启用TLS协议时必填，且必须带有私钥）
 }
 ```
