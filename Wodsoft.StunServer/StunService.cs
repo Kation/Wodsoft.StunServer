@@ -162,7 +162,7 @@ namespace Wodsoft.StunServer
             while (!cancellationToken.IsCancellationRequested)
             {
                 var memory = MemoryPool<byte>.Shared.Rent(1240);
-                var remoteEndPoint = new IPEndPoint(IPAddress.Any, 0);
+                var remoteEndPoint = new IPEndPoint(thisAddress.AddressFamily == AddressFamily.InterNetwork ? IPAddress.Any : IPAddress.IPv6Any, 0);
                 SocketReceiveFromResult result;
                 try
                 {
