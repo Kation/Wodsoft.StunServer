@@ -12,10 +12,10 @@ using System.Threading;
 using Wodsoft.StunServer;
 using Wodsoft.StunServer.Commands;
 
-
 var rootCommand = new RootCommand
 {
     new ConfigCommand(),
-    new RunCommand()
+    new RunCommand(),
+    new ServiceCommand()
 };
 await rootCommand.InvokeAsync(args);

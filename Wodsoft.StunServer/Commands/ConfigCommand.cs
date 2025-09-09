@@ -38,7 +38,7 @@ namespace Wodsoft.StunServer.Commands
                 Console.WriteLine($"Read configuration file failed: {ex.Message}");
                 return;
             }
-            var config = await JsonSerializer.DeserializeAsync<Config>(stream, SourceGenerationContext.Default.Options) ?? new Config();
+            var config = await JsonSerializer.DeserializeAsync<Config>(stream, SourceGenerationContext.Default.Config) ?? new Config();
             await stream.DisposeAsync();
             if (config.Validate())
             {
@@ -65,7 +65,7 @@ namespace Wodsoft.StunServer.Commands
                 Console.WriteLine($"Create configuration file failed: {ex.Message}");
                 return;
             }
-            await JsonSerializer.SerializeAsync(stream, new Config(), SourceGenerationContext.Default.Options);
+            await JsonSerializer.SerializeAsync(stream, new Config(), SourceGenerationContext.Default.Config);
             await stream.FlushAsync();
             await stream.DisposeAsync();
             Console.WriteLine("Generate default configuration file successfully.");
