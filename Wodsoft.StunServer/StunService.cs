@@ -167,7 +167,7 @@ namespace Wodsoft.StunServer
                 try
                 {
                     result = await thisAddressThisPortSocket.ReceiveFromAsync(memory.Memory, remoteEndPoint, cancellationToken).ConfigureAwait(false);
-                    logger.LogDebug($"Receive UDP request from {result.RemoteEndPoint}");
+                    logger.LogDebug($"Receive UDP request from {result.RemoteEndPoint} to {thisAddressThisPortSocket.LocalEndPoint}");
                 }
                 catch (OperationCanceledException)
                 {
@@ -200,13 +200,25 @@ namespace Wodsoft.StunServer
                             try
                             {
                                 if (!changeAddress && !changePort)
+                                {
+                                    logger.LogDebug($"Send UDP response from {thisAddressThisPortSocket.LocalEndPoint} to {endPoint}");
                                     await thisAddressThisPortSocket.SendToAsync(response.Memory.Slice(0, responseLength), endPoint, cancellationToken).ConfigureAwait(false);
+                                }
                                 else if (changeAddress && !changePort)
+                                {
+                                    logger.LogDebug($"Send UDP response from {otherAddressThisPortSocket.LocalEndPoint} to {endPoint}");
                                     await otherAddressThisPortSocket.SendToAsync(response.Memory.Slice(0, responseLength), endPoint, cancellationToken).ConfigureAwait(false);
+                                }
                                 else if (changeAddress && changePort)
+                                {
+                                    logger.LogDebug($"Send UDP response from {otherAddressOtherPortSocket.LocalEndPoint} to {endPoint}");
                                     await otherAddressOtherPortSocket.SendToAsync(response.Memory.Slice(0, responseLength), endPoint, cancellationToken).ConfigureAwait(false);
+                                }
                                 else
+                                {
+                                    logger.LogDebug($"Send UDP response from {thisAddressOtherPortSocket.LocalEndPoint} to {endPoint}");
                                     await thisAddressOtherPortSocket.SendToAsync(response.Memory.Slice(0, responseLength), endPoint, cancellationToken).ConfigureAwait(false);
+                                }
                             }
                             catch (Exception ex)
                             {
