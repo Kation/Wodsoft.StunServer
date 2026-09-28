@@ -1,5 +1,6 @@
 <Solution>
   <Folder Name="/src/">
+    <Project Path="src/Wodsoft.StunServer.Core/Wodsoft.StunServer.Core.csproj" Id="825360d1-cc65-4db4-91f3-fd195a25ac8a" />
     <Project Path="src/Wodsoft.StunServer/Wodsoft.StunServer.csproj" />
   </Folder>
   <Folder Name="/解决方案项/">

@@ -24,4 +24,8 @@
 	<ItemGroup Condition="'$(Configuration)'=='Debug'">
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="10.0.12" />
 	</ItemGroup>
+
+	<ItemGroup>
+	  <ProjectReference Include="..\Wodsoft.StunServer.Core\Wodsoft.StunServer.Core.csproj" />
+	</ItemGroup>
 </Project>

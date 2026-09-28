@@ -2,8 +2,8 @@
   "profiles": {
     "Wodsoft.StunServer": {
       "commandName": "Project",
-      //"commandLineArgs": "run -v Debug -s",
-      "commandLineArgs": "service create",
+      "commandLineArgs": "run -v Debug -s",
+      //"commandLineArgs": "service create",
       "environmentVariables": {
         "SSLKEYLOGFILE": "c:\\tlskey.log"
       }

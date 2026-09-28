@@ -18,13 +18,13 @@ namespace Wodsoft.StunServer
 
         public string? SecondaryIPv6Address { get; set; }
 
-        public int PrimaryPort { get; set; } = 3478;
+        public ushort PrimaryPort { get; set; } = 3478;
 
-        public int SecondaryPort { get; set; } = 3479;
+        public ushort SecondaryPort { get; set; } = 3479;
 
-        public int TLSPrimaryPort { get; set; } = 5349;
+        public ushort TLSPrimaryPort { get; set; } = 5349;
 
-        public int TLSSecondaryPort { get; set; } = 5350;
+        public ushort TLSSecondaryPort { get; set; } = 5350;
 
         public string? LocalPrimaryIPv4Address { get; set; }
 
@@ -34,13 +34,13 @@ namespace Wodsoft.StunServer
 
         public string? LocalSecondaryIPv6Address { get; set; }
 
-        public int? LocalPrimaryPort { get; set; }
+        public ushort? LocalPrimaryPort { get; set; }
 
-        public int? LocalSecondaryPort { get; set; }
+        public ushort? LocalSecondaryPort { get; set; }
 
-        public int? LocalTLSPrimaryPort { get; set; }
+        public ushort? LocalTLSPrimaryPort { get; set; }
 
-        public int? LocalTLSSecondaryPort { get; set; }
+        public ushort? LocalTLSSecondaryPort { get; set; }
         
         public bool EnableUDP { get; set; } = true;
 
