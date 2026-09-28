@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/Wodsoft.StunServer/Wodsoft.StunServer.csproj" />
+  </Folder>
+  <Folder Name="/解决方案项/">
+    <File Path="README.md" />
+  </Folder>
+</Solution>
