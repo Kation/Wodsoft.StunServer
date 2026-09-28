@@ -12,12 +12,12 @@ namespace Wodsoft.StunServer.Commands
         public ServiceCommand() : base("service", "Configure stun service.")
         {
             var createCommand = new Command("create", "Create stun system service.");
-            createCommand.SetHandler(Create);
-            AddCommand(createCommand);
+            createCommand.SetAction(_ => Create());
+            Subcommands.Add(createCommand);
 
             var deleteCommand = new Command("delete", "Delete stun system service.");
-            deleteCommand.SetHandler(Delete);
-            AddCommand(deleteCommand);
+            deleteCommand.SetAction(_ => Delete());
+            Subcommands.Add(deleteCommand);
         }
 
         private void Create()

@@ -22,4 +22,4 @@ var rootCommand = new RootCommand
     new RunCommand(),
     new ServiceCommand()
 };
-await rootCommand.InvokeAsync(args);
+return await rootCommand.Parse(args).InvokeAsync();

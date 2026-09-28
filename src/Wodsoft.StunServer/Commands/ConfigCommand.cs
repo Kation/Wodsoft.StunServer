@@ -13,12 +13,12 @@ namespace Wodsoft.StunServer.Commands
         public ConfigCommand() : base("config", "Stun server configuration.")
         {
             var statusCommand = new Command("validate", "Validate configuration.");
-            statusCommand.SetHandler(ValidateAsync);
-            AddCommand(statusCommand);
+            statusCommand.SetAction((_, _) => ValidateAsync());
+            Subcommands.Add(statusCommand);
 
             var generateCommand = new Command("generate", "Generate a default configuration.");
-            generateCommand.SetHandler(GenerateAsync);
-            AddCommand(generateCommand);
+            generateCommand.SetAction((_, _) => GenerateAsync());
+            Subcommands.Add(generateCommand);
         }
 
         private async Task ValidateAsync()

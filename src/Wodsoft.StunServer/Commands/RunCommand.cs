@@ -22,23 +22,33 @@ namespace Wodsoft.StunServer.Commands
     {
         public RunCommand() : base("run", "Run stun server.")
         {
-            var verbosityOption = new Option<LogLevel>("--verbosity", "Logging verbosity.");
-            verbosityOption.AddAlias("-v");
-            verbosityOption.Arity = ArgumentArity.ExactlyOne;
 #if DEBUG
-            verbosityOption.SetDefaultValue(LogLevel.Information);
+            var defaultVerbosity = LogLevel.Information;
 #else
-            verbosityOption.SetDefaultValue(LogLevel.Warning);
+            var defaultVerbosity = LogLevel.Warning;
 #endif
-            AddOption(verbosityOption);
+            var verbosityOption = new Option<LogLevel>("--verbosity", "-v")
+            {
+                Description = "Logging verbosity.",
+                Arity = ArgumentArity.ExactlyOne,
+                DefaultValueFactory = _ => defaultVerbosity
+            };
+            Options.Add(verbosityOption);
 
-            var serviceOption = new Option<bool>("--service", "Run as service.");
-            serviceOption.AddAlias("-s");
-            serviceOption.Arity = ArgumentArity.Zero;
-            //serviceOption.SetDefaultValue(false);
-            AddOption(serviceOption);
+            var serviceOption = new Option<bool>("--service", "-s")
+            {
+                Description = "Run as service.",
+                Arity = ArgumentArity.Zero
+            };
+            Options.Add(serviceOption);
 
-            this.SetHandler(RunAsync, verbosityOption, serviceOption);
+            SetAction(async (parseResult, _) =>
+            {
+                await RunAsync(
+                    parseResult.GetValue(verbosityOption),
+                    parseResult.GetValue(serviceOption));
+                return Environment.ExitCode;
+            });
         }
 
         private async Task RunAsync(LogLevel logLevel, bool isService)
