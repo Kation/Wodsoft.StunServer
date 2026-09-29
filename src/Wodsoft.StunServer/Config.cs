@@ -41,8 +41,26 @@ namespace Wodsoft.StunServer
         public ushort? LocalTLSPrimaryPort { get; set; }
 
         public ushort? LocalTLSSecondaryPort { get; set; }
-        
+
+        public string? ProxyRemoteIPv4Address { get; set; }
+
+        public string? ProxyLocalIPv4Address { get; set; }
+
+        public string? ProxyRemoteIPv6Address { get; set; }
+
+        public string? ProxyLocalIPv6Address { get; set; }
+
+        public ushort ProxyRemoteIPv4Port { get; set; } = 51200;
+
+        public ushort ProxyLocalIPv4Port { get; set; } = 51200;
+
+        public ushort ProxyRemoteIPv6Port { get; set; } = 51201;
+
+        public ushort ProxyLocalIPv6Port { get; set; } = 51201;
+
         public bool EnableUDP { get; set; } = true;
+
+        public bool EnableUDPProxy { get; set; } = false;
 
         public bool EnableTCP { get; set; } = true;
 

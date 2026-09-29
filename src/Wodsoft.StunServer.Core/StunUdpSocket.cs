@@ -24,9 +24,9 @@ namespace Wodsoft.StunServer
             return _socket.ReceiveFromAsync(buffer, socketFlags, receivedAddress, cancellationToken);
         }
 
-        public ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, SocketAddress socketAddress, CancellationToken cancellationToken = default)
+        public ValueTask<int> SendToAsync(byte[] buffer, int length, SocketFlags socketFlags, SocketAddress socketAddress, CancellationToken cancellationToken = default)
         {
-            return _socket.SendToAsync(buffer, socketFlags, socketAddress, cancellationToken);
+            return _socket.SendToAsync(buffer.AsMemory(0, length), socketFlags, socketAddress, cancellationToken);
         }
 
         public void Dispose()

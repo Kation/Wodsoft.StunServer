@@ -12,7 +12,7 @@ namespace Wodsoft.StunServer
 
         IPEndPoint LocalEndPoint { get; }
 
-        ValueTask<int> SendToAsync(ReadOnlyMemory<byte> buffer, SocketFlags socketFlags, SocketAddress socketAddress, CancellationToken cancellationToken = default);
+        ValueTask<int> SendToAsync(byte[] buffer, int length, SocketFlags socketFlags, SocketAddress socketAddress, CancellationToken cancellationToken = default);
 
         ValueTask<int> ReceiveFromAsync(Memory<byte> buffer, SocketFlags socketFlags, SocketAddress receivedAddress, CancellationToken cancellationToken = default);
     }

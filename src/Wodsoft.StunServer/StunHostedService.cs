@@ -13,27 +13,29 @@ namespace Wodsoft.StunServer
     {
         private readonly ILogger<StunService> _logger;
         private readonly StunService _service;
+        private readonly string _configPath;
         private CancellationTokenSource? _cts;
 
-        public StunHostedService(ILogger<StunService> logger)
+        public StunHostedService(ILogger<StunService> logger, string configPath)
         {
             _logger = logger;
             _service = new StunService();
+            _configPath = configPath;
         }
 
         public async Task StartAsync(CancellationToken cancellationToken)
         {
             Config config;
-            if (!File.Exists("config.json"))
+            if (!File.Exists(_configPath))
             {
-                throw new InvalidOperationException("Configuration file config.json not exists.");
+                throw new InvalidOperationException($"Configuration file {_configPath} not exists.");
             }
             else
             {
                 Stream stream;
                 try
                 {
-                    stream = File.OpenRead("config.json");
+                    stream = File.OpenRead(_configPath);
                 }
                 catch (Exception ex)
                 {

@@ -6,8 +6,8 @@
 		<ImplicitUsings>enable</ImplicitUsings>
 		<Nullable>enable</Nullable>
 		<AssemblyName>StunServer</AssemblyName>
-		<PublishAot>true</PublishAot>
-		<PublishTrimmed>true</PublishTrimmed>
+		<!--<PublishAot>true</PublishAot>
+		<PublishTrimmed>true</PublishTrimmed>-->
 		<AllowUnsafeBlocks>True</AllowUnsafeBlocks>
 	</PropertyGroup>
 

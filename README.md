@@ -1,116 +1,197 @@
-# Wodsoft.StunServer 
-Ò»¸öÊ¹ÓÃC#ÓïÑÔµÄStun·şÎñÆ÷¡£
+ï»¿# Wodsoft.StunServer 
+ä¸€ä¸ªä½¿ç”¨C#è¯­è¨€çš„StunæœåŠ¡å™¨ã€‚
 
-# Ö§³ÖĞ­Òé
+# æ”¯æŒåè®®
 
 ## RFC3489
-½öÖ§³ÖÆÕÍ¨°ó¶¨ÇëÇó¡£  
+ä»…æ”¯æŒæ™®é€šç»‘å®šè¯·æ±‚ã€‚  
 RFC3489 11.2.1 Mapped-Address  
-RFC3489 11.2.2 Response-Address(RFC5389ÆúÓÃ)  
-RFC3489 11.2.3 Changed-Address(RFC5389ÆúÓÃ)  
-RFC3489 11.2.4 Change-Request(RFC5389ÆúÓÃ,RFC5780ÖØĞÂÆôÓÃ)  
-RFC3489 11.2.5 Source-Address(RFC5389ÆúÓÃ)  
+RFC3489 11.2.2 Response-Address(RFC5389å¼ƒç”¨)  
+RFC3489 11.2.3 Changed-Address(RFC5389å¼ƒç”¨)  
+RFC3489 11.2.4 Change-Request(RFC5389å¼ƒç”¨,RFC5780é‡æ–°å¯ç”¨)  
+RFC3489 11.2.5 Source-Address(RFC5389å¼ƒç”¨)  
 RFC3489 11.2.6 Username  
-RFC3489 11.2.7 Password(²»Ö§³Ö,RFC5389ÆúÓÃ)  
+RFC3489 11.2.7 Password(ä¸æ”¯æŒ,RFC5389å¼ƒç”¨)  
 RFC3489 11.2.8 Message-Integrity  
 RFC3489 11.2.9 Error-Code  
 RFC3489 11.2.10 Unknown-Attribute  
-RFC3489 11.2.11 Reflected-From(RFC5389ÆúÓÃ)
+RFC3489 11.2.11 Reflected-From(RFC5389å¼ƒç”¨)
 
 ## RFC5389
-½öÖ§³ÖÆÕÍ¨°ó¶¨ÇëÇó¡£  
+ä»…æ”¯æŒæ™®é€šç»‘å®šè¯·æ±‚ã€‚  
 RFC5389 15.1 Mapped-Address  
 RFC5389 15.2 XOR-Mapped-Address  
 RFC5389 15.3 Username  
 RFC5389 15.4 Message-Integrity  
-RFC5389 15.5 Fingerprint(²»Ö§³Ö)  
+RFC5389 15.5 Fingerprint(ä¸æ”¯æŒ)  
 RFC5389 15.6 Error-Code  
 RFC5389 15.7 Realm  
 RFC5389 15.8 Nonce  
 RFC5389 15.9 Unknown-Attribute  
-RFC5389 15.10 Software(²»Ö§³Ö)  
-RFC5389 15.11 Alternate-Server(²»Ö§³Ö)  
+RFC5389 15.10 Software(ä¸æ”¯æŒ)  
+RFC5389 15.11 Alternate-Server(ä¸æ”¯æŒ)  
 
 ## RFC5780
 RFC5780 7.2 Change-Request  
 RFC5780 7.3 Response-Origin  
 RFC5780 7.4 Other-Address  
 RFC5780 7.5 Response-Port  
-RFC5780 7.6 Padding(²»Ö§³Ö)
+RFC5780 7.6 Padding(ä¸æ”¯æŒ)
 
 ## RFC8489
 RFC8489 14.6 MESSAGE-INTEGRITY-SHA256  
 RFC8489 14.11 PASSWORD-ALGORITHM  
 RFC8489 14.12 PASSWORD-ALGORITHMS  
 
-## ÈÏÖ¤
-Ä¬ÈÏ²»Ç¿ÖÆÈÏÖ¤¡£×ÓÀà¿ÉÍ¨¹ı `RequireAuthorized` / `AuthorizationRealm` / `GetPasswordAsync` ÆôÓÃ£º  
-- ¶ÌÆÚÆ¾Ö¤£ºUSERNAME + MESSAGE-INTEGRITY£¨»ò MESSAGE-INTEGRITY-SHA256£©  
-- ³¤ÆÚÆ¾Ö¤£ºUSERNAME + REALM + NONCE + MESSAGE-INTEGRITY£¨»ò MESSAGE-INTEGRITY-SHA256£©£»ÌôÕ½ÏìÓ¦»á·µ»Ø REALM¡¢NONCE¡¢PASSWORD-ALGORITHMS£¨MD5 / SHA-256£©  
-- Ö§³Ö´íÎóÂë 401 Unauthorized¡¢438 Stale Nonce¡¢420 Unknown Attribute¡¢400 Bad Request
+## è®¤è¯
+é»˜è®¤ä¸å¼ºåˆ¶è®¤è¯ã€‚å­ç±»å¯é€šè¿‡ `RequireAuthorized` / `AuthorizationRealm` / `GetPasswordAsync` å¯ç”¨ï¼š  
+- çŸ­æœŸå‡­è¯ï¼šUSERNAME + MESSAGE-INTEGRITYï¼ˆæˆ– MESSAGE-INTEGRITY-SHA256ï¼‰  
+- é•¿æœŸå‡­è¯ï¼šUSERNAME + REALM + NONCE + MESSAGE-INTEGRITYï¼ˆæˆ– MESSAGE-INTEGRITY-SHA256ï¼‰ï¼›æŒ‘æˆ˜å“åº”ä¼šè¿”å› REALMã€NONCEã€PASSWORD-ALGORITHMSï¼ˆMD5 / SHA-256ï¼‰  
+- æ”¯æŒé”™è¯¯ç  401 Unauthorizedã€438 Stale Nonceã€420 Unknown Attributeã€400 Bad Request
 
-# ÈçºÎÊ¹ÓÃ
+# å¦‚ä½•ä½¿ç”¨
 
-## ÅäÖÃ
+## é…ç½®
 
-### ³õÊ¼»¯ÅäÖÃÎÄ¼ş
+### åˆå§‹åŒ–é…ç½®æ–‡ä»¶
 ```
 stunserver config generate
 ```
-´ËÃüÁî»á³õÊ¼»¯config.jsonÅäÖÃÎÄ¼ş¡£
+æ­¤å‘½ä»¤ä¼šåˆå§‹åŒ–config.jsoné…ç½®æ–‡ä»¶ã€‚
 
-### ÑéÖ¤ÅäÖÃÎÄ¼ş
+### éªŒè¯é…ç½®æ–‡ä»¶
 ```
 stunserver config validate
 ```
-´ËÃüÁî»áÑéÖ¤config.jsonÅäÖÃÎÄ¼şµÄÕıÈ·ĞÔ¡£
+æ­¤å‘½ä»¤ä¼šéªŒè¯config.jsoné…ç½®æ–‡ä»¶çš„æ­£ç¡®æ€§ã€‚
 
-## ÔËĞĞ
+## è¿è¡Œ
 ```
 stunserver run
 ```
-´ËÃüÁî»áÆô¶¯Stun·şÎñÆ÷
+æ­¤å‘½ä»¤ä¼šå¯åŠ¨StunæœåŠ¡å™¨
 
-### ¿ÉÑ¡²ÎÊı
+### å¯é€‰å‚æ•°
 ```
 -v LogLevel
 ```
 - Trace
 - Debug
-- **Information**  (Ä¬ÈÏ)
+- **Information**  (é»˜è®¤)
 - Warning
 - Error
 
-# ÅäÖÃÎÄ¼şËµÃ÷
+# é…ç½®æ–‡ä»¶è¯´æ˜
 ```
 {
-  "PrimaryIPv4Address": "",//µÚÒ»¸öIPv4µØÖ·
-  "SecondaryIPv4Address": "",//µÚ¶ş¸öIPv4µØÖ·
-  "PrimaryIPv6Address": "",//µÚÒ»¸öIPv6µØÖ·
-  "SecondaryIPv6Address": "",//µÚ¶ş¸öIPv6µØÖ·
-  "PrimaryPort": 3478,//µÚÒ»¸ö¶Ë¿ÚºÅ
-  "SecondaryPort": 3479,//µÚ¶ş¸ö¶Ë¿ÚºÅ
-  "TLSPrimaryPort": 5349,//µÚÒ»¸öTLS¶Ë¿ÚºÅ
-  "TLSSecondaryPort": 5350,//µÚ¶ş¸öTLS¶Ë¿ÚºÅ
-  "LocalPrimaryIPv4Address": null,//±¾µØµÚÒ»¸öIPv4µØÖ·
-  "LocalSecondaryIPv4Address": null,//±¾µØµÚ¶ş¸öIPv4µØÖ·
-  "LocalPrimaryIPv6Address": null,//±¾µØµÚÒ»¸öIPv6µØÖ·
-  "LocalSecondaryIPv6Address": null,//±¾µØµÚ¶ş¸öIPv6µØÖ·
-  "LocalPrimaryPort": null,//±¾µØµÚÒ»¸ö¶Ë¿ÚºÅ
-  "LocalSecondaryPort": null,//±¾µØµÚ¶ş¸ö¶Ë¿ÚºÅ
-  "LocalTLSPrimaryPort": null,//±¾µØµÚÒ»¸öTLS¶Ë¿ÚºÅ
-  "LocalTLSSecondaryPort": null,//±¾µØµÚ¶ş¸öTLS¶Ë¿ÚºÅ
-  "EnableUDP": true,//ÊÇ·ñÆôÓÃUDPĞ­Òé
-  "EnableTCP": false,//ÊÇ·ñÆôÓÃTCPĞ­Òé
-  "EnableTLS": false,//ÊÇ·ñÆôÓÃTLSĞ­Òé
-  "EnableIPv4": true,//ÊÇ·ñÆôÓÃIPv4
-  "EnableIPv6": false,//ÊÇ·ñÆôÓÃIPv6
-  "CertificateFile": "tls.pem"//TLSÖ¤ÊéÎÄ¼şÂ·¾¶£¨ÆôÓÃTLSĞ­ÒéÊ±±ØÌî£¬ÇÒ±ØĞë´øÓĞË½Ô¿£©
+  "PrimaryIPv4Address": "",//ç¬¬ä¸€ä¸ªIPv4åœ°å€
+  "SecondaryIPv4Address": "",//ç¬¬äºŒä¸ªIPv4åœ°å€
+  "PrimaryIPv6Address": "",//ç¬¬ä¸€ä¸ªIPv6åœ°å€
+  "SecondaryIPv6Address": "",//ç¬¬äºŒä¸ªIPv6åœ°å€
+  "PrimaryPort": 3478,//ç¬¬ä¸€ä¸ªç«¯å£å·
+  "SecondaryPort": 3479,//ç¬¬äºŒä¸ªç«¯å£å·
+  "TLSPrimaryPort": 5349,//ç¬¬ä¸€ä¸ªTLSç«¯å£å·
+  "TLSSecondaryPort": 5350,//ç¬¬äºŒä¸ªTLSç«¯å£å·
+  "LocalPrimaryIPv4Address": null,//æœ¬åœ°ç¬¬ä¸€ä¸ªIPv4åœ°å€
+  "LocalSecondaryIPv4Address": null,//æœ¬åœ°ç¬¬äºŒä¸ªIPv4åœ°å€
+  "LocalPrimaryIPv6Address": null,//æœ¬åœ°ç¬¬ä¸€ä¸ªIPv6åœ°å€
+  "LocalSecondaryIPv6Address": null,//æœ¬åœ°ç¬¬äºŒä¸ªIPv6åœ°å€
+  "LocalPrimaryPort": null,//æœ¬åœ°ç¬¬ä¸€ä¸ªç«¯å£å·
+  "LocalSecondaryPort": null,//æœ¬åœ°ç¬¬äºŒä¸ªç«¯å£å·
+  "LocalTLSPrimaryPort": null,//æœ¬åœ°ç¬¬ä¸€ä¸ªTLSç«¯å£å·
+  "LocalTLSSecondaryPort": null,//æœ¬åœ°ç¬¬äºŒä¸ªTLSç«¯å£å·
+  "ProxyLocalIPv4Address": null,//UDP Proxyæœ¬åœ°IPv4åœ°å€ï¼ˆæœ¬æœºç»‘å®šï¼‰
+  "ProxyRemoteIPv4Address": null,//UDP Proxyå¯¹ç«¯IPv4åœ°å€
+  "ProxyLocalIPv4Port": 51200,//UDP Proxyæœ¬åœ°IPv4ç«¯å£
+  "ProxyRemoteIPv4Port": 51200,//UDP Proxyå¯¹ç«¯IPv4ç«¯å£
+  "ProxyLocalIPv6Address": null,//UDP Proxyæœ¬åœ°IPv6åœ°å€ï¼ˆæœ¬æœºç»‘å®šï¼‰
+  "ProxyRemoteIPv6Address": null,//UDP Proxyå¯¹ç«¯IPv6åœ°å€
+  "ProxyLocalIPv6Port": 51201,//UDP Proxyæœ¬åœ°IPv6ç«¯å£
+  "ProxyRemoteIPv6Port": 51201,//UDP Proxyå¯¹ç«¯IPv6ç«¯å£
+  "EnableUDP": true,//æ˜¯å¦å¯ç”¨UDPåè®®
+  "EnableUDPProxy": false,//æ˜¯å¦å¯ç”¨åŒæœºUDP Proxyæ¨¡å¼
+  "EnableTCP": false,//æ˜¯å¦å¯ç”¨TCPåè®®
+  "EnableTLS": false,//æ˜¯å¦å¯ç”¨TLSåè®®
+  "EnableIPv4": true,//æ˜¯å¦å¯ç”¨IPv4
+  "EnableIPv6": false,//æ˜¯å¦å¯ç”¨IPv6
+  "CertificateFile": "tls.pem"//TLSè¯ä¹¦æ–‡ä»¶è·¯å¾„ï¼ˆå¯ç”¨TLSåè®®æ—¶å¿…å¡«ï¼Œä¸”å¿…é¡»å¸¦æœ‰ç§é’¥ï¼‰
 }
 ```
-Local¿ªÍ·µÄ²ÎÊı£¬Ò»°ãÓÃÓÚ´¦ÓÚÄÚÍø»·¾³£¬Ã»ÓĞÖ±½ÓÓµÓĞ¹«ÍøIPµØÖ·µÄ·şÎñÆ÷Ê¹ÓÃ¡£  
-¸Ã²ÎÊıÓÃÓÚ½øĞĞSocket°ó¶¨£¬²»Ó°Ïì·µ»Ø¸øStun¿Í»§¶ËµÄ·şÎñÆ÷µØÖ·Óë¶Ë¿ÚºÅ¡£
+Localå¼€å¤´çš„å‚æ•°ï¼Œä¸€èˆ¬ç”¨äºå¤„äºå†…ç½‘ç¯å¢ƒï¼Œæ²¡æœ‰ç›´æ¥æ‹¥æœ‰å…¬ç½‘IPåœ°å€çš„æœåŠ¡å™¨ä½¿ç”¨ã€‚  
+è¯¥å‚æ•°ç”¨äºè¿›è¡ŒSocketç»‘å®šï¼Œä¸å½±å“è¿”å›ç»™Stunå®¢æˆ·ç«¯çš„æœåŠ¡å™¨åœ°å€ä¸ç«¯å£å·ã€‚
 
-# ÍÆ¼öStun¿Í»§¶Ë
-C#¿ª·¢µÄÍøÂçNAT×´Ì¬²âÊÔ¹¤¾ß  
+# åŒæœºç»„æˆ Stun over UDP
+
+å®Œæ•´çš„ STUN UDP æœåŠ¡é€šå¸¸éœ€è¦åŒä¸€ä¸»æœºç»‘å®šä¸¤ä¸ªå…¬ç½‘åœ°å€ï¼ˆPrimary / Secondaryï¼‰ï¼Œæ‰èƒ½æ­£ç¡®å“åº” Change-Request ç­‰è¡Œä¸ºã€‚  
+å½“ä¸¤å°æœºå™¨å„è‡ªåªæœ‰ä¸€ä¸ªå…¬ç½‘åœ°å€æ—¶ï¼Œå¯å¼€å¯ `EnableUDPProxy`ï¼Œé€šè¿‡ç§æœ‰ UDP Proxy é€šé“äº’ç›¸è½¬å‘â€œå¦ä¸€åœ°å€â€çš„å“åº”ï¼Œå…±åŒç»„æˆä¸€å¥— Stun over UDP æœåŠ¡ã€‚
+
+## å·¥ä½œåŸç†
+
+- æ¯å°æœºå™¨åªåœ¨æœ¬æœº Primary åœ°å€ä¸Šç»‘å®š PrimaryPort / SecondaryPortï¼Œå¯¹å¤–æä¾› STUN æœåŠ¡ã€‚
+- éœ€è¦ä» Secondary åœ°å€å‘å‡ºçš„å“åº”ï¼Œä¼šç»æœ¬æœº Proxy Socket é™„åŠ å®¢æˆ·ç«¯åœ°å€ä¸ç«¯å£æ ‡è®°åï¼Œå‘å¾€å¯¹ç«¯ `ProxyRemote`ã€‚
+- å¯¹ç«¯æ”¶åˆ° Proxy æŠ¥æ–‡åï¼Œå†ä»æœ¬æœºå¯¹åº”ç«¯å£å‘ç»™å®¢æˆ·ç«¯ï¼Œä»è€Œå®ç°è·¨æœºå™¨çš„â€œæ¢åœ°å€ / æ¢ç«¯å£â€å“åº”ã€‚
+- Proxy é€šé“ä»…ç”¨äºä¸¤å°æœåŠ¡å™¨ä¹‹é—´é€šä¿¡ï¼Œä¸å¯¹ STUN å®¢æˆ·ç«¯å¼€æ”¾ã€‚
+
+## éƒ¨ç½²è¦æ±‚
+
+1. ä¸¤å°æœºå™¨åˆ†åˆ«æ‹¥æœ‰ä¸€ä¸ªå…¬ç½‘åœ°å€ï¼Œä¸”å‡å¯è¢«å®¢æˆ·ç«¯è®¿é—® PrimaryPort / SecondaryPortã€‚
+2. ä¸¤å°æœºå™¨ä¹‹é—´ç½‘ç»œäº’é€šï¼Œå¯äº’ç›¸è®¿é—®å¯¹æ–¹çš„ Proxy ç«¯å£ï¼ˆé»˜è®¤ IPv4: 51200ï¼ŒIPv6: 51201ï¼‰ã€‚
+3. ä¸¤å°æœºå™¨å‡å¯ç”¨ `EnableUDP` + `EnableUDPProxy`ï¼Œå¯¹å¤–å…¬å¸ƒçš„ Primary / Secondary åœ°å€äº’ç›¸äº¤å‰é…ç½®ã€‚
+4. å½“å‰ä»…æ”¯æŒ UDPï¼›TCP / TLS ä»æŒ‰å•æœº Primary åœ°å€å·¥ä½œã€‚
+
+## é…ç½®ç¤ºä¾‹ï¼ˆIPv4ï¼‰
+
+å‡è®¾ï¼š
+- æœºå™¨ A å…¬ç½‘åœ°å€ï¼š`1.1.1.1`
+- æœºå™¨ B å…¬ç½‘åœ°å€ï¼š`2.2.2.2`
+- å†…ç½‘äº’é€šåœ°å€åˆ†åˆ«ä¸º `10.0.0.1` / `10.0.0.2`
+
+### æœºå™¨ Aï¼ˆconfig.jsonï¼‰
+```
+{
+  "PrimaryIPv4Address": "1.1.1.1",
+  "SecondaryIPv4Address": "2.2.2.2",
+  "PrimaryPort": 3478,
+  "SecondaryPort": 3479,
+  "EnableUDP": true,
+  "EnableUDPProxy": true,
+  "EnableTCP": false,
+  "EnableTLS": false,
+  "EnableIPv4": true,
+  "EnableIPv6": false,
+  "ProxyLocalIPv4Address": "10.0.0.1",
+  "ProxyLocalIPv4Port": 51200,
+  "ProxyRemoteIPv4Address": "10.0.0.2",
+  "ProxyRemoteIPv4Port": 51200
+}
+```
+
+### æœºå™¨ Bï¼ˆconfig.jsonï¼‰
+```
+{
+  "PrimaryIPv4Address": "2.2.2.2",
+  "SecondaryIPv4Address": "1.1.1.1",
+  "PrimaryPort": 3478,
+  "SecondaryPort": 3479,
+  "EnableUDP": true,
+  "EnableUDPProxy": true,
+  "EnableTCP": false,
+  "EnableTLS": false,
+  "EnableIPv4": true,
+  "EnableIPv6": false,
+  "ProxyLocalIPv4Address": "10.0.0.2",
+  "ProxyLocalIPv4Port": 51200,
+  "ProxyRemoteIPv4Address": "10.0.0.1",
+  "ProxyRemoteIPv4Port": 51200
+}
+```
+
+è¦ç‚¹ï¼š
+- æœºå™¨ A çš„ Primary å¯¹åº”æœºå™¨ B çš„ Secondaryï¼Œåä¹‹äº¦ç„¶ã€‚
+- `ProxyLocal*` ä¸ºæœ¬æœº Proxy Socket ç»‘å®šåœ°å€/ç«¯å£ï¼›`ProxyRemote*` ä¸ºå¯¹ç«¯ Proxy åœ°å€/ç«¯å£ã€‚
+- è‹¥æœåŠ¡å™¨ç›´æ¥ä½¿ç”¨å…¬ç½‘åœ°å€äº’é€šï¼Œ`ProxyLocal*` / `ProxyRemote*` ä¹Ÿå¯ç›´æ¥å¡«å†™å¯¹åº”å…¬ç½‘åœ°å€ã€‚
+- å¯ç”¨ IPv6 æ—¶ï¼ŒæŒ‰åŒæ ·è§„åˆ™é…ç½® `ProxyLocalIPv6*` / `ProxyRemoteIPv6*`ï¼ˆé»˜è®¤ç«¯å£ 51201ï¼‰ã€‚
+
+# æ¨èStunå®¢æˆ·ç«¯
+C#å¼€å‘çš„ç½‘ç»œNATçŠ¶æ€æµ‹è¯•å·¥å…·  
 https://github.com/HMBSbige/NatTypeTester

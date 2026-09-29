@@ -42,16 +42,25 @@ namespace Wodsoft.StunServer.Commands
             };
             Options.Add(serviceOption);
 
+            var configOption = new Option<string>("--config", "-c")
+            {
+                Description = "Configuration file name.",
+                Arity = ArgumentArity.ExactlyOne,
+                DefaultValueFactory = _ => "config.json"
+            };
+            Options.Add(configOption);
+
             SetAction(async (parseResult, _) =>
             {
                 await RunAsync(
                     parseResult.GetValue(verbosityOption),
-                    parseResult.GetValue(serviceOption));
+                    parseResult.GetValue(serviceOption),
+                    parseResult.GetValue(configOption) ?? "config.json");
                 return Environment.ExitCode;
             });
         }
 
-        private async Task RunAsync(LogLevel logLevel, bool isService)
+        private async Task RunAsync(LogLevel logLevel, bool isService, string configPath)
         {
             if (isService)
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(Environment.ProcessPath)!);
@@ -73,7 +82,9 @@ namespace Wodsoft.StunServer.Commands
                         SourceName = "StunServer"
                     });
                 }
-                builder.Services.AddHostedService<StunHostedService>();
+                builder.Services.AddHostedService(sp => new StunHostedService(
+                    sp.GetRequiredService<ILogger<StunService>>(),
+                    configPath));
                 var host = builder.Build();
                 await host.RunAsync();
             }
@@ -88,10 +99,10 @@ namespace Wodsoft.StunServer.Commands
                 });
                 var logger = loggerFactory.CreateLogger<StunService>();
                 Config config;
-                if (!File.Exists("config.json"))
+                if (!File.Exists(configPath))
                 {
 
-                    logger.LogError("Configuration file config.json not exists.");
+                    logger.LogError($"Configuration file {configPath} not exists.");
                     Environment.ExitCode = 126;
                     return;
                 }
@@ -100,7 +111,7 @@ namespace Wodsoft.StunServer.Commands
                     Stream stream;
                     try
                     {
-                        stream = File.OpenRead("config.json");
+                        stream = File.OpenRead(configPath);
                     }
                     catch (Exception ex)
                     {
