@@ -3,6 +3,9 @@
     <Project Path="src/Wodsoft.StunServer.Core/Wodsoft.StunServer.Core.csproj" Id="825360d1-cc65-4db4-91f3-fd195a25ac8a" />
     <Project Path="src/Wodsoft.StunServer/Wodsoft.StunServer.csproj" />
   </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/Wodsoft.StunServer.UnitTest/Wodsoft.StunServer.UnitTest.csproj" Id="0e03d29e-cc6f-43c5-9f3b-550e0b5d6948" />
+  </Folder>
   <Folder Name="/解决方案项/">
     <File Path="README.md" />
   </Folder>

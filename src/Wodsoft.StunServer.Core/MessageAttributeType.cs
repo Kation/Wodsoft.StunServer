@@ -21,9 +21,12 @@ namespace Wodsoft.StunServer
         ReflectedFrom = 0x0B00,//11
         Realm = 0x1400,
         Nonce = 0x1500,
+        MessageIntegritySHA256 = 0x1C00,//0x001C
+        PasswordAlgorithm = 0x1D00,//0x001D
         XORMappedAddress = 0x2000,//32
         Padding = 0x2600,
         ResponsePort = 0x2700,
+        PasswordAlgorithms = 0x0280,//0x8002
         ResponseOrigin = 0x2B80,
         OtherAddress = 0x2C80
     }

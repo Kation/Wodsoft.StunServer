@@ -10,6 +10,11 @@ namespace Wodsoft.StunServer
         public ushort ReplyPort;
         public bool ChangeAddress;
         public bool ChangePort;
-        public bool HasMessageIntegrity;
+        public ReadOnlyMemory<byte> UserName;
+        public ReadOnlyMemory<byte> Realm;
+        public ReadOnlyMemory<byte> Nonce;
+        public ushort PasswordAlgorithm;
+        public int MessageIntegrityOffset;
+        public ReadOnlyMemory<byte> MessageIntegrity;
     }
 }
