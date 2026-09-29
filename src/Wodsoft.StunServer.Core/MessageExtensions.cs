@@ -19,7 +19,7 @@ namespace Wodsoft.StunServer
             return Enum.IsDefined(attributeType);
         }
 
-        public static bool ValidateMessageIntegrity(this Span<byte> data)
+        public static bool ValidateMessageIntegrity(this ReadOnlySpan<byte> data)
         {
             using (var hmac = new HMACSHA1())
             {

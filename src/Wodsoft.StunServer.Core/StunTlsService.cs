@@ -84,19 +84,19 @@ namespace Wodsoft.StunServer
                         return;
                     filled = messageReady;
 
-                    var response = ProcessMessage(clientSocket, buffer, messageLength, thisAddress, otherAddress, out var responseLength);
+                    var result = await ProcessMessage(clientSocket, buffer, messageLength, thisAddress, otherAddress).ConfigureAwait(false);
                     var remaining = filled - messageLength;
                     if (remaining > 0)
                         Buffer.BlockCopy(buffer, messageLength, buffer, 0, remaining);
                     filled = remaining;
 
-                    if (response == null)
+                    if (result.Response == null)
                         continue;
 
                     try
                     {
                         _logger.LogDebug($"Send TLS response from {clientSocket.LocalEndPoint} to {clientSocket.RemoteEndPoint}");
-                        await sslStream.WriteAsync(response.AsMemory(0, responseLength), cancellationToken).ConfigureAwait(false);
+                        await sslStream.WriteAsync(result.Response.AsMemory(0, result.ResponseLength), cancellationToken).ConfigureAwait(false);
                     }
                     catch (Exception ex) when (ex is not OperationCanceledException)
                     {
@@ -105,7 +105,7 @@ namespace Wodsoft.StunServer
                     }
                     finally
                     {
-                        ReturnBuffer(response);
+                        ReturnBuffer(result.Response);
                     }
                 }
             }
@@ -196,26 +196,22 @@ namespace Wodsoft.StunServer
             return filled;
         }
 
-        private byte[]? ProcessMessage(Socket clientSocket, byte[] buffer, int messageLength, byte[] thisAddress, byte[] otherAddress, out int responseLength)
+        private async ValueTask<StunRequestResult> ProcessMessage(Socket clientSocket, byte[] buffer, int messageLength, byte[] thisAddress, byte[] otherAddress)
         {
-            responseLength = 0;
             var endPoint = (IPEndPoint)clientSocket.RemoteEndPoint!;
-            var remoteAddressBytes = endPoint.Address.GetAddressBytes();
-            ushort remotePort = (ushort)endPoint.Port;
-            byte[]? response;
+            StunRequestResult result;
             try
             {
-                Span<byte> remoteAddress = remoteAddressBytes;
-                response = HandleRequest(buffer.AsSpan(0, messageLength), remoteAddress, ref remotePort, thisAddress, _options.PrimaryPort, otherAddress, _options.SecondaryPort, out _, out _, out responseLength);
+                result = await HandleRequestAsync(buffer.AsMemory(0, messageLength), endPoint.Address.GetAddressBytes(), (ushort)endPoint.Port, thisAddress, _options.PrimaryPort, otherAddress, _options.SecondaryPort).ConfigureAwait(false);
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Handle request failed.");
-                return null;
+                return default;
             }
-            if (response == null)
+            if (result.Response == null)
                 _logger.LogDebug($"Bad request from {clientSocket.RemoteEndPoint}");
-            return response;
+            return result;
         }
     }
 }

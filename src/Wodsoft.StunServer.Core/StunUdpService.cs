@@ -77,6 +77,7 @@ namespace Wodsoft.StunServer
             var otherAddressThisPortSocket = _options.SecondaryAddressPrimaryPortSocket;
             var otherAddressOtherPortSocket = _options.SecondaryAddressSecondaryPortSocket;
             ReceiveData receiveData;
+            var remoteAddressBytes = new byte[16];
             SocketAddress remoteAddress = new SocketAddress(_options.PrimaryAddress.AddressFamily);
             while (await reader.WaitToReadAsync())
             {
@@ -86,13 +87,13 @@ namespace Wodsoft.StunServer
                         receiveData.SocketAddress.Slice(0, 6).CopyTo(remoteAddress.Buffer.Span.Slice(2));
                     else
                         receiveData.SocketAddress.CopyTo(remoteAddress.Buffer.Span.Slice(2));
-                    byte[]? response;
-                    bool changeAddress, changePort;
-                    int responseLength;
+                    StunRequestResult result;
                     ushort responsePort = receiveData.Port;
+                    var addressLength = thisAddress.Length == 4 ? 4 : 16;
+                    receiveData.Address.Slice(0, addressLength).CopyTo(remoteAddressBytes);
                     try
                     {
-                        response = HandleRequest(receiveData.Data.AsSpan(0, receiveData.Length), thisAddress.Length == 4 ? receiveData.Address.Slice(0, 4) : receiveData.Address, ref receiveData.Port, thisAddress, thisPort, otherAddress, otherPort, out changeAddress, out changePort, out responseLength);
+                        result = await HandleRequestAsync(receiveData.Data.AsMemory(0, receiveData.Length), remoteAddressBytes.AsMemory(0, addressLength), receiveData.Port, thisAddress, thisPort, otherAddress, otherPort).ConfigureAwait(false);
                     }
                     catch (Exception ex)
                     {
@@ -103,31 +104,33 @@ namespace Wodsoft.StunServer
                     {
                         ReturnBuffer(receiveData.Data);
                     }
-                    if (response != null)
+                    if (result.Response != null)
                     {
-                        if (responsePort != receiveData.Port)
-                            BinaryPrimitives.WriteUInt16BigEndian(remoteAddress.Buffer.Span.Slice(2), responsePort);
+                        if (result.ResponsePort != default)
+                            BinaryPrimitives.WriteUInt16BigEndian(remoteAddress.Buffer.Span.Slice(2), result.ResponsePort);
+                        if (!result.ResponseAddress.IsEmpty)
+                            result.ResponseAddress.Span.CopyTo(remoteAddress.Buffer.Span.Slice(addressLength == 4 ? 4 : 8, result.ResponseAddress.Length));
                         try
                         {
-                            if (!changeAddress && !changePort)
+                            if (!result.ChangeAddress && !result.ChangePort)
                             {
                                 _logger.LogDebug($"Send UDP response from {thisAddressThisPortSocket.LocalEndPoint} to {remoteAddress}");
-                                await thisAddressThisPortSocket.SendToAsync(response.AsMemory(0, responseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
+                                await thisAddressThisPortSocket.SendToAsync(result.Response.AsMemory(0, result.ResponseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
                             }
-                            else if (changeAddress && !changePort)
+                            else if (result.ChangeAddress && !result.ChangePort)
                             {
                                 _logger.LogDebug($"Send UDP response from {otherAddressThisPortSocket.LocalEndPoint} to {remoteAddress}");
-                                await otherAddressThisPortSocket.SendToAsync(response.AsMemory(0, responseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
+                                await otherAddressThisPortSocket.SendToAsync(result.Response.AsMemory(0, result.ResponseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
                             }
-                            else if (changeAddress && changePort)
+                            else if (result.ChangeAddress && result.ChangePort)
                             {
                                 _logger.LogDebug($"Send UDP response from {otherAddressOtherPortSocket.LocalEndPoint} to {remoteAddress}");
-                                await otherAddressOtherPortSocket.SendToAsync(response.AsMemory(0, responseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
+                                await otherAddressOtherPortSocket.SendToAsync(result.Response.AsMemory(0, result.ResponseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
                             }
                             else
                             {
                                 _logger.LogDebug($"Send UDP response from {thisAddressOtherPortSocket.LocalEndPoint} to {remoteAddress}");
-                                await thisAddressOtherPortSocket.SendToAsync(response.AsMemory(0, responseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
+                                await thisAddressOtherPortSocket.SendToAsync(result.Response.AsMemory(0, result.ResponseLength), SocketFlags.None, remoteAddress).ConfigureAwait(false);
                             }
                         }
                         catch (Exception ex)
@@ -136,7 +139,7 @@ namespace Wodsoft.StunServer
                         }
                         finally
                         {
-                            ReturnBuffer(response);
+                            ReturnBuffer(result.Response);
                         }
                     }
                     else

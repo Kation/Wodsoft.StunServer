@@ -29,19 +29,16 @@ namespace Wodsoft.StunServer
             _pool.Return(buffer);
         }
 
-        protected byte[]? HandleRequest(Span<byte> request, Span<byte> remoteAddress, ref ushort remotePort, Span<byte> thisAddress, ushort thisPort,
-            Span<byte> otherAddress, ushort otherPort, out bool changeAddress, out bool changePort, out int responseLength)
+        protected ValueTask<StunRequestResult> HandleRequestAsync(ReadOnlyMemory<byte> request, ReadOnlyMemory<byte> remoteAddress, ushort remotePort, ReadOnlyMemory<byte> thisAddress, ushort thisPort,
+            ReadOnlyMemory<byte> otherAddress, ushort otherPort)
         {
-            changeAddress = false;
-            changePort = false;
-            responseLength = 0;
-            ref MessageHeader header = ref MemoryMarshal.AsRef<MessageHeader>(request);
+            ref readonly MessageHeader header = ref MemoryMarshal.AsRef<MessageHeader>(request.Span);
             if (header.MessageType != MessageType.Request)
-                return null;
+                return default;
             bool isRFC5389 = header.MagicCookie == 0x42A41221;
             var length = request.Length;
             if (header.MessageLength + 20 != length)
-                return null;
+                return default;
             var current = 20;
             var transactionId = request.Slice(8, 12);
             var state = new StunServiceState();
@@ -53,13 +50,13 @@ namespace Wodsoft.StunServer
             while (current < length)
             {
                 if (length - current < 4)
-                    return null;
-                ref MessageAttributeType attributeType = ref MemoryMarshal.AsRef<MessageAttributeType>(request.Slice(current, 2));
+                    return default;
+                ref readonly MessageAttributeType attributeType = ref MemoryMarshal.AsRef<MessageAttributeType>(request.Slice(current, 2).Span);
                 //rfc3489 11.2
-                Span<byte> data;
-                var attributeLength = BinaryPrimitives.ReadUInt16BigEndian(request.Slice(current + 2));
+                ReadOnlyMemory<byte> data;
+                var attributeLength = BinaryPrimitives.ReadUInt16BigEndian(request.Slice(current + 2).Span);
                 if (length - current - 4 < attributeLength)
-                    return null;
+                    return default;
                 data = request.Slice(current + 4, attributeLength);
                 current += 4 + attributeLength;
                 if (!IsValidAttribute(attributeType))
@@ -69,11 +66,11 @@ namespace Wodsoft.StunServer
                     continue;
                 }
                 if (!HandleAttribute(ref state, data, attributeType, current == length))
-                    return null;
+                    return default;
             }
-            if (state.HasMessageIntegrity && !request.ValidateMessageIntegrity())
+            if (state.HasMessageIntegrity && !request.Span.ValidateMessageIntegrity())
                 messageIntegrityFailed = true;
-            responseLength = 20;
+            int responseLength = 20;
             bool hasError = false;
             var response = RentBuffer();
             var buffer = response.AsSpan(20);
@@ -99,8 +96,6 @@ namespace Wodsoft.StunServer
             if (!hasError)
             {
                 CreateMappedAddressAttribute(ref buffer, remoteAddress, remotePort, ref responseLength);
-                if (!state.ReplyAddress.IsEmpty)
-                    CreateReflectedFromAttribute(ref buffer, state.ReplyAddress, state.ReplyPort, ref responseLength);
                 if (isRFC5389)
                 {
                     CreateXORMappedAddressAttribute(ref buffer, transactionId, remoteAddress, remotePort, ref responseLength);
@@ -111,28 +106,32 @@ namespace Wodsoft.StunServer
                 {
                     CreateSourceAddressAttribute(ref buffer, thisAddress, thisPort, ref responseLength);
                     CreateChangedAddressAttribute(ref buffer, otherAddress, otherPort, ref responseLength);
+                    if (!state.ReplyAddress.IsEmpty || state.ReplyPort != 0)
+                        CreateReflectedFromAttribute(ref buffer, remoteAddress, remotePort, ref responseLength);
                 }
                 //if (replyEndPoint != null)
                 //    responseAttributes.Add(CreateReflectedFromAttribute(endPoint.Address, endPoint.Port, ref responseLength));
             }
             if (!hasError && state.HasMessageIntegrity)
                 responseLength += 28;
-            header = ref MemoryMarshal.AsRef<MessageHeader>(response.AsSpan());
-            header.MessageType = hasError ? MessageType.Error : MessageType.Response;
+            ref var responseHeader = ref MemoryMarshal.AsRef<MessageHeader>(response.AsSpan());
+            responseHeader.MessageType = hasError ? MessageType.Error : MessageType.Response;
             BinaryPrimitives.WriteUInt16BigEndian(response.AsSpan(2), (ushort)(responseLength - 20));
             if (isRFC5389)
-                header.MagicCookie = 0x42A41221u;
-            transactionId.CopyTo(response.AsSpan(8, 12));
-            var responseData = response.AsSpan(20);
+                responseHeader.MagicCookie = 0x42A41221u;
+            transactionId.Span.CopyTo(response.AsSpan(8, 12));
             if (!hasError && state.HasMessageIntegrity)
                 response.AsSpan().SetMessageIntegrity();
-            if (!state.ReplyAddress.IsEmpty)
-                remoteAddress = state.ReplyAddress;
-            if (state.ReplyPort != default)
-                remotePort = state.ReplyPort;
-            changeAddress = state.ChangeAddress;
-            changePort = state.ChangePort;
-            return response;
+            var result = new StunRequestResult
+            {
+                Response = response,
+                ResponseLength = responseLength,
+                ResponsePort = state.ReplyPort,
+                ResponseAddress = state.ReplyAddress,
+                ChangeAddress = state.ChangeAddress,
+                ChangePort = state.ChangePort
+            };
+            return new ValueTask<StunRequestResult>(result);
         }
 
         protected virtual bool IsValidAttribute(MessageAttributeType attributeType)
@@ -158,26 +157,26 @@ namespace Wodsoft.StunServer
             }
         }
 
-        protected virtual bool HandleAttribute(ref StunServiceState state, Span<byte> data, MessageAttributeType attributeType, bool isEnd)
+        protected virtual bool HandleAttribute(ref StunServiceState state, ReadOnlyMemory<byte> data, MessageAttributeType attributeType, bool isEnd)
         {
             switch (attributeType)
             {
                 case MessageAttributeType.ResponseAddress:
                     if (data.Length < 4)
                         return false;
-                    switch (data[1])
+                    switch (data.Span[1])
                     {
                         case 1:
                             if (data.Length < 8)
                                 return false;
                             state.ReplyAddress = data.Slice(4, 4);
-                            state.ReplyPort = BinaryPrimitives.ReadUInt16BigEndian(data.Slice(2, 2)); ;
+                            state.ReplyPort = BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(2, 2)); ;
                             break;
                         case 2:
                             if (data.Length < 20)
                                 return false;
                             state.ReplyAddress = data.Slice(4, 16);
-                            state.ReplyPort = BinaryPrimitives.ReadUInt16BigEndian(data.Slice(2, 2));
+                            state.ReplyPort = BinaryPrimitives.ReadUInt16BigEndian(data.Span.Slice(2, 2));
                             break;
                         default:
                             return false;
@@ -186,15 +185,15 @@ namespace Wodsoft.StunServer
                 case MessageAttributeType.ChangeRequest:
                     if (data.Length != 4)
                         return false;
-                    if ((data[3] & (byte)2) == (byte)2)
+                    if ((data.Span[3] & (byte)2) == (byte)2)
                         state.ChangePort = true;
-                    if ((data[3] & (byte)4) == (byte)4)
+                    if ((data.Span[3] & (byte)4) == (byte)4)
                         state.ChangeAddress = true;
                     return true;
                 case MessageAttributeType.ResponsePort:
                     if (data.Length != 4)
                         return false;
-                    state.ReplyPort = BinaryPrimitives.ReadUInt16BigEndian(data);
+                    state.ReplyPort = BinaryPrimitives.ReadUInt16BigEndian(data.Span);
                     return true;
                 case MessageAttributeType.MessageIntegrity:
                     if (!isEnd)
@@ -244,40 +243,41 @@ namespace Wodsoft.StunServer
             buffer = buffer.Slice(attributeLength);
         }
 
-        private void CreateMappedAddressAttribute(ref Span<byte> buffer, Span<byte> address, ushort port, ref int length)
+        private void CreateMappedAddressAttribute(ref Span<byte> buffer, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
             CreateAddressAttribute(ref buffer, MessageAttributeType.MappedAddress, address, port, ref length);
         }
 
-        private void CreateSourceAddressAttribute(ref Span<byte> buffer, Span<byte> address, ushort port, ref int length)
+        private void CreateSourceAddressAttribute(ref Span<byte> buffer, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
             CreateAddressAttribute(ref buffer, MessageAttributeType.SourceAddress, address, port, ref length);
         }
 
-        private void CreateChangedAddressAttribute(ref Span<byte> buffer, Span<byte> address, ushort port, ref int length)
+        private void CreateChangedAddressAttribute(ref Span<byte> buffer, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
             CreateAddressAttribute(ref buffer, MessageAttributeType.ChangedAddress, address, port, ref length);
         }
 
-        private void CreateReflectedFromAttribute(ref Span<byte> buffer, Span<byte> address, ushort port, ref int length)
+        private void CreateReflectedFromAttribute(ref Span<byte> buffer, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
             CreateAddressAttribute(ref buffer, MessageAttributeType.ReflectedFrom, address, port, ref length);
         }
 
-        private void CreateOtherAddressAttribute(ref Span<byte> buffer, Span<byte> address, ushort port, ref int length)
+        private void CreateOtherAddressAttribute(ref Span<byte> buffer, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
             CreateAddressAttribute(ref buffer, MessageAttributeType.OtherAddress, address, port, ref length);
         }
 
-        private void CreateResponseOriginAttribute(ref Span<byte> buffer, Span<byte> address, ushort port, ref int length)
+        private void CreateResponseOriginAttribute(ref Span<byte> buffer, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
             CreateAddressAttribute(ref buffer, MessageAttributeType.ResponseOrigin, address, port, ref length);
         }
 
-        private void CreateXORMappedAddressAttribute(ref Span<byte> buffer, Span<byte> transactionId, Span<byte> address, ushort port, ref int length)
+        private void CreateXORMappedAddressAttribute(ref Span<byte> buffer, ReadOnlyMemory<byte> transactionId, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
+            var addressSpan = address.Span;
             int attributeLength;
-            if (address.Length == 4)
+            if (addressSpan.Length == 4)
                 attributeLength = 12;
             else
                 attributeLength = 24;
@@ -285,30 +285,32 @@ namespace Wodsoft.StunServer
             MemoryMarshal.Write(buffer, MessageAttributeType.XORMappedAddress);
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(2), (ushort)(attributeLength - 4));
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(6), (ushort)(port ^ 0x2112u));
-            if (address.Length == 4)
+            if (addressSpan.Length == 4)
                 buffer[5] = 1;
             else
                 buffer[5] = 2;
-            address.CopyTo(buffer.Slice(8));
+            addressSpan.CopyTo(buffer.Slice(8));
             //0x42A41221
             buffer[8] ^= 0x21;
             buffer[9] ^= 0x12;
             buffer[10] ^= 0xA4;
             buffer[11] ^= 0x42;
-            if (address.Length != 4)
+            if (addressSpan.Length != 4)
             {
+                var transactionIdSpan = transactionId.Span;
                 for (int i = 0; i < 12; i++)
                 {
-                    buffer[12 + i] ^= transactionId[i];
+                    buffer[12 + i] ^= transactionIdSpan[i];
                 }
             }
             buffer = buffer.Slice(attributeLength);
         }
 
-        private void CreateAddressAttribute(ref Span<byte> buffer, MessageAttributeType attributeType, Span<byte> address, ushort port, ref int length)
+        private void CreateAddressAttribute(ref Span<byte> buffer, MessageAttributeType attributeType, ReadOnlyMemory<byte> address, ushort port, ref int length)
         {
+            var addressSpan = address.Span;
             int attributeLength;
-            if (address.Length == 4)
+            if (addressSpan.Length == 4)
                 attributeLength = 12;
             else
                 attributeLength = 24;
@@ -316,11 +318,11 @@ namespace Wodsoft.StunServer
             MemoryMarshal.Write(buffer, attributeType);
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(2), (ushort)(attributeLength - 4));
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(6), (ushort)port);
-            if (address.Length == 4)
+            if (addressSpan.Length == 4)
                 buffer[5] = 1;
             else
                 buffer[5] = 2;
-            address.CopyTo(buffer.Slice(8));
+            addressSpan.CopyTo(buffer.Slice(8));
             buffer = buffer.Slice(attributeLength);
         }
     }
