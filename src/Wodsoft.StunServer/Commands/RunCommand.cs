@@ -64,7 +64,6 @@ namespace Wodsoft.StunServer.Commands
         {
             if (isService)
                 Directory.SetCurrentDirectory(Path.GetDirectoryName(Environment.ProcessPath)!);
-            File.AppendAllText("log.txt", $"LogLevel: {logLevel}, IsService: {isService}\r\n");
             if (isService)
             {
                 var builder = Host.CreateApplicationBuilder();
