@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -9,6 +9,8 @@ namespace Wodsoft.StunServer
 {
     public class StunUdpProxy
     {
+        private const int MinPayloadLength = 20;
+
         private readonly StunUdpProxyOptions _options;
         private readonly SocketAddress _proxyAddress;
         private readonly ILogger _logger;
@@ -19,8 +21,9 @@ namespace Wodsoft.StunServer
             _logger = logger;
             var proxyAddress = options.ProxyEndPoint.Serialize();
             _proxyAddress = proxyAddress;
-            PrimaryPortSocket = new StunUdpProxySocket(options.ProxySocket, proxyAddress, options.PrimaryPortSocket.AddressFamily == AddressFamily.InterNetwork ? 6 : 18, 1);
-            SecondaryPortSocket = new StunUdpProxySocket(options.ProxySocket, proxyAddress, options.PrimaryPortSocket.AddressFamily == AddressFamily.InterNetwork ? 6 : 18, 2);
+            var addressLength = GetAddressLength(options.PrimaryPortSocket.AddressFamily);
+            PrimaryPortSocket = new StunUdpProxySocket(options.ProxySocket, proxyAddress, addressLength, 1);
+            SecondaryPortSocket = new StunUdpProxySocket(options.ProxySocket, proxyAddress, addressLength, 2);
         }
 
         public async Task RunAsync(CancellationToken cancellationToken = default)
@@ -30,8 +33,8 @@ namespace Wodsoft.StunServer
             int length;
             var primarySocket = _options.PrimaryPortSocket;
             var secondarySocket = _options.SecondaryPortSocket;
-            Socket socket;
             var remoteAddress = new SocketAddress(proxyAddress.Family);
+            var addressLength = GetAddressLength(remoteAddress.Family);
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
@@ -50,36 +53,47 @@ namespace Wodsoft.StunServer
                 {
                     return;
                 }
-                var flag = buffer[length - 1];
-                if ((flag & 1) == 1)
+                if (!TryUnwrap(buffer.AsSpan(0, length), remoteAddress.Family, out var payloadLength, out var secondary))
                 {
-                    socket = primarySocket;
-                }
-                else if ((flag & 2) == 2)
-                {
-                    socket = secondarySocket;
-                }
-                else
-                {
-                    _logger.LogWarning($"Receive from proxy but flag is {flag}.");
+                    _logger.LogWarning($"Receive from proxy but the packet is invalid, length is {length}.");
                     continue;
                 }
-                if (remoteAddress.Family == AddressFamily.InterNetwork)
-                {
-                    buffer.AsSpan(length - 7, 6).CopyTo(remoteAddress.Buffer.Span.Slice(2));
-                }
-                else
-                {
-                    buffer.AsSpan(length - 19, 18).CopyTo(remoteAddress.Buffer.Span.Slice(2));
-                }
+                var socket = secondary ? secondarySocket : primarySocket;
+                buffer.AsSpan(payloadLength, addressLength).CopyTo(remoteAddress.Buffer.Span.Slice(2));
                 _logger.LogDebug($"Send UDP proxy response to {remoteAddress}");
-                await primarySocket.SendToAsync(buffer.AsMemory(0, length - 19), SocketFlags.None, remoteAddress, cancellationToken);
+                await socket.SendToAsync(buffer.AsMemory(0, payloadLength), SocketFlags.None, remoteAddress, cancellationToken);
             }
         }
 
         public IStunUdpSocket PrimaryPortSocket { get; }
 
         public IStunUdpSocket SecondaryPortSocket { get; }
+
+        /// <summary>
+        /// 尾部由 <paramref name="family"/> 对应的 SocketAddress 片段（端口 + 地址）和 1 个字节的标志位组成。
+        /// </summary>
+        internal static int GetAddressLength(AddressFamily family) => family == AddressFamily.InterNetwork ? 6 : 18;
+
+        /// <summary>
+        /// 去掉 <see cref="StunUdpProxySocket.SendToAsync"/> 追加在报文尾部的端口地址片段和标志位，
+        /// 得到真实的 STUN 数据长度。
+        /// </summary>
+        internal static bool TryUnwrap(ReadOnlySpan<byte> packet, AddressFamily family, out int payloadLength, out bool secondary)
+        {
+            payloadLength = 0;
+            secondary = false;
+            if (packet.Length == 0)
+                return false;
+            var flag = packet[^1];
+            if ((flag & 1) == 1)
+                secondary = false;
+            else if ((flag & 2) == 2)
+                secondary = true;
+            else
+                return false;
+            payloadLength = packet.Length - GetAddressLength(family) - 1;
+            return payloadLength >= MinPayloadLength;
+        }
 
         private class StunUdpProxySocket : IStunUdpSocket
         {

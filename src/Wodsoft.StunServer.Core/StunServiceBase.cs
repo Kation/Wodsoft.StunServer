@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Buffers;
 using System.Buffers.Binary;
 using System.Collections.Generic;
@@ -150,16 +150,20 @@ namespace Wodsoft.StunServer
             }
             else
             {
+                //rfc5780 6.1/7.3、rfc3489 11.2.4：RESPONSE-ORIGIN（SOURCE-ADDRESS）是响应实际发出的地址和端口，
+                //需要跟随 CHANGE-REQUEST 的标志位，而不是请求到达的地址。
+                var sourceAddress = state.ChangeAddress ? otherAddress : thisAddress;
+                var sourcePort = state.ChangePort ? otherPort : thisPort;
                 CreateMappedAddressAttribute(ref buffer, remoteAddress, remotePort, ref responseLength);
                 if (isRFC5389)
                 {
                     CreateXORMappedAddressAttribute(ref buffer, transactionId, remoteAddress, remotePort, ref responseLength);
-                    CreateResponseOriginAttribute(ref buffer, thisAddress, thisPort, ref responseLength);
+                    CreateResponseOriginAttribute(ref buffer, sourceAddress, sourcePort, ref responseLength);
                     CreateOtherAddressAttribute(ref buffer, otherAddress, otherPort, ref responseLength);
                 }
                 else
                 {
-                    CreateSourceAddressAttribute(ref buffer, thisAddress, thisPort, ref responseLength);
+                    CreateSourceAddressAttribute(ref buffer, sourceAddress, sourcePort, ref responseLength);
                     CreateChangedAddressAttribute(ref buffer, otherAddress, otherPort, ref responseLength);
                     if (!state.ReplyAddress.IsEmpty || state.ReplyPort != 0)
                         CreateReflectedFromAttribute(ref buffer, remoteAddress, remotePort, ref responseLength);
@@ -565,6 +569,7 @@ namespace Wodsoft.StunServer
             MemoryMarshal.Write(buffer, MessageAttributeType.XORMappedAddress);
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(2), (ushort)(attributeLength - 4));
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(6), (ushort)(port ^ 0x2112u));
+            buffer[4] = 0;
             if (addressSpan.Length == 4)
                 buffer[5] = 1;
             else
@@ -598,6 +603,7 @@ namespace Wodsoft.StunServer
             MemoryMarshal.Write(buffer, attributeType);
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(2), (ushort)(attributeLength - 4));
             BinaryPrimitives.WriteUInt16BigEndian(buffer.Slice(6), (ushort)port);
+            buffer[4] = 0;
             if (addressSpan.Length == 4)
                 buffer[5] = 1;
             else

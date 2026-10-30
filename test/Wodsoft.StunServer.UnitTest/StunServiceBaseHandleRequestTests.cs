@@ -303,6 +303,37 @@ public class StunServiceBaseHandleRequestTests
         Assert.NotEqual(new byte[] { 0x11, 0x22, 0x33, 0x44 }, result.Response.AsSpan(4, 4).ToArray());
     }
 
+    [Theory]
+    [InlineData(0x00, false, false)]
+    [InlineData(0x02, false, true)]
+    [InlineData(0x04, true, false)]
+    [InlineData(0x06, true, true)]
+    public async Task Rfc5389_response_origin_is_the_address_the_response_is_sent_from(byte flags, bool changeAddress, bool changePort)
+    {
+        var request = new RequestBuilder().Add(MessageAttributeType.ChangeRequest, Change(flags)).Build();
+        var result = await SendAsync(new FakeStunService(), request);
+
+        var attributes = AssertSuccess(result, rfc5389: true, classicPrefixCleared: false);
+        AssertAddress(attributes[2], 0x802B, changeAddress ? OtherV4 : LocalV4, changePort ? OtherPort : LocalPort);
+        //rfc5780 表 1：OTHER-ADDRESS 恒为 Ca:Cp，与 CHANGE-REQUEST 标志位无关
+        AssertAddress(attributes[3], 0x802C, OtherV4, OtherPort);
+    }
+
+    [Theory]
+    [InlineData(0x00, false, false)]
+    [InlineData(0x02, false, true)]
+    [InlineData(0x04, true, false)]
+    [InlineData(0x06, true, true)]
+    public async Task Rfc3489_source_address_is_the_address_the_response_is_sent_from(byte flags, bool changeAddress, bool changePort)
+    {
+        var request = new RequestBuilder(rfc5389: false).Add(MessageAttributeType.ChangeRequest, Change(flags)).Build();
+        var result = await SendAsync(new FakeStunService(), request);
+
+        var attributes = AssertSuccess(result, rfc5389: false, classicPrefixCleared: true);
+        AssertAddress(attributes[1], 0x0004, changeAddress ? OtherV4 : LocalV4, changePort ? OtherPort : LocalPort);
+        AssertAddress(attributes[2], 0x0005, OtherV4, OtherPort);
+    }
+
     [Fact]
     public async Task Reversed_magic_cookie_is_handled_as_rfc3489()
     {
