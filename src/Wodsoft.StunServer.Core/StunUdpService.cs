@@ -46,7 +46,7 @@ namespace Wodsoft.StunServer
                     try
                     {
                         length = await thisAddressThisPortSocket.ReceiveFromAsync(receiveBuffer, SocketFlags.None, remoteAddress, cancellationToken).ConfigureAwait(false);
-                        _logger.LogDebug($"Receive UDP request from {remoteAddress} to {thisAddressThisPortSocket.LocalEndPoint}");
+                        _logger.LogDebug($"Receive UDP request from {remoteAddress.Format()} to {thisAddressThisPortSocket.LocalEndPoint}");
                     }
                     catch (TaskCanceledException)
                     {
@@ -93,6 +93,7 @@ namespace Wodsoft.StunServer
             var otherAddressOtherPortSocket = _options.SecondaryAddressSecondaryPortSocket;
             ReceiveData receiveData;
             SocketAddress remoteAddress = new SocketAddress(_options.PrimaryAddress.AddressFamily);
+            byte[] formatEndPoint = new byte[70];
             while (await reader.WaitToReadAsync())
             {
                 while (reader.TryRead(out receiveData))
@@ -130,27 +131,41 @@ namespace Wodsoft.StunServer
                                 BinaryPrimitives.WriteUInt16BigEndian(remoteAddress.Buffer.Span.Slice(2), result.ResponsePort);
                             if (!result.ResponseAddress.IsEmpty)
                                 result.ResponseAddress.Span.CopyTo(remoteAddress.Buffer.Span.Slice(4, result.ResponseAddress.Length));
-                            var sendSocket = thisAddressThisPortSocket;
+                            IStunUdpSocket sendSocket;
+                            byte[] sendAddress;
+                            ushort sendPort;
                             if (result.ChangeAddress && result.ChangePort)
                             {
                                 sendSocket = otherAddressOtherPortSocket;
+                                sendAddress = otherAddress;
+                                sendPort = otherPort;
                             }
                             else if (result.ChangeAddress)
                             {
                                 sendSocket = otherAddressThisPortSocket;
+                                sendAddress = otherAddress;
+                                sendPort = thisPort;
                             }
                             else if (result.ChangePort)
                             {
                                 sendSocket = thisAddressOtherPortSocket;
+                                sendAddress = thisAddress;
+                                sendPort = otherPort;
+                            }
+                            else
+                            {
+                                sendSocket = thisAddressThisPortSocket;
+                                sendAddress = thisAddress;
+                                sendPort = thisPort;
                             }
                             try
                             {
-                                _logger.LogDebug($"Send UDP response to {remoteAddress}");
+                                _logger.LogDebug($"Send UDP response to {remoteAddress.Format()} from {MessageExtensions.Format(sendAddress)}:{sendPort}");
                                 await sendSocket.SendToAsync(result.Response, result.ResponseLength, SocketFlags.None, remoteAddress).ConfigureAwait(false);
                             }
                             catch (Exception ex)
                             {
-                                _logger.LogDebug(ex, $"Send response to {remoteAddress} failed");
+                                _logger.LogDebug(ex, $"Send response to {remoteAddress.Format()} failed");
                             }
                             finally
                             {
